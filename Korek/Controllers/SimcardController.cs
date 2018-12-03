@@ -24,7 +24,7 @@ namespace Korek.Controllers
                 return View(new Simcard());
             else
             {
-                using (DBModel db = new DBModel())
+                using (DBModels db = new DBModels())
                 {
                     return View(db.Simcards.Where(x => x.SimcardID == simId).Where(x => x.CorporateID == id).FirstOrDefault<Simcard>());
                 }
@@ -34,7 +34,7 @@ namespace Korek.Controllers
         [HttpPost]
         public ActionResult AddOrEdit(Simcard simcard)
         {
-            using (DBModel db = new DBModel())
+            using (DBModels db = new DBModels())
             {
                 if (simcard.SimcardID == 0)
                 {
@@ -54,7 +54,7 @@ namespace Korek.Controllers
         [HttpPost]
         public ActionResult Delete(int id)
         {
-            using (DBModel db = new DBModel())
+            using (DBModels db = new DBModels())
             {
                 Simcard simcard = db.Simcards.Where(x => x.CorporateID == id).FirstOrDefault<Simcard>();
                 db.Simcards.Remove(simcard);

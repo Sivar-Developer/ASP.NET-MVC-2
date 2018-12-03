@@ -15,7 +15,7 @@ namespace Korek.Models
     public partial class Simcard
     {
         public int SimcardID { get; set; }
-        public Nullable<int> Number { get; set; }
+        public Nullable<decimal> Number { get; set; }
         public string CustomerName { get; set; }
         public Nullable<int> CorporateID { get; set; }
     }

@@ -18,7 +18,7 @@ namespace Korek.Controllers
 
         public ActionResult GetData()
         {
-            using (DBModel db = new DBModel())
+            using (DBModels db = new DBModels())
             {
                 List<Corporate> empList = db.Corporates.ToList<Corporate>();
                 return Json(new { data = empList }, JsonRequestBehavior.AllowGet);
@@ -32,7 +32,7 @@ namespace Korek.Controllers
                 return View(new Corporate());
             else
             {
-                using (DBModel db = new DBModel())
+                using (DBModels db = new DBModels())
                 {
                     return View(db.Corporates.Where(x => x.CorporateID == id).FirstOrDefault<Corporate>());
                 }
@@ -42,7 +42,7 @@ namespace Korek.Controllers
         [HttpPost]
         public ActionResult AddOrEdit(Corporate cor)
         {
-            using (DBModel db = new DBModel())
+            using (DBModels db = new DBModels())
             {
                 if (cor.CorporateID == 0)
                 {
@@ -62,7 +62,7 @@ namespace Korek.Controllers
         [HttpPost]
         public ActionResult Delete(int id)
         {
-            using (DBModel db = new DBModel())
+            using (DBModels db = new DBModels())
             {
                 Corporate cor = db.Corporates.Where(x => x.CorporateID == id).FirstOrDefault<Corporate>();
                 db.Corporates.Remove(cor);
@@ -78,7 +78,7 @@ namespace Korek.Controllers
                 return View(new Corporate());
             else
             {
-                using (DBModel db = new DBModel())
+                using (DBModels db = new DBModels())
                 {
                     return View(db.Corporates.Where(x => x.CorporateID == id).FirstOrDefault<Corporate>());
                 }
@@ -92,7 +92,7 @@ namespace Korek.Controllers
                 return View(new Corporate());
             else
             {
-                using (DBModel db = new DBModel())
+                using (DBModels db = new DBModels())
                 {
                     List<Simcard> simcards = db.Simcards.Where(x => x.CorporateID == id).ToList<Simcard>();
                     return Json(new { data = simcards }, JsonRequestBehavior.AllowGet);
