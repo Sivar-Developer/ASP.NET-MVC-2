@@ -1,0 +1,124 @@
+﻿@model Korek.Models.Corporate
+@{
+    ViewBag.Title = "Corporate Details | SIM Cards List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>Corporate Details:</h2>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <b>Unique Number:</b> @Model.UniqueNumber <br />
+                <b>Corporate Name:</b> @Model.Name <br />
+                <b>Address:</b> @Model.Address <br />
+            </div>
+        </div>
+    </div>
+</div>
+<a class="btn btn-light" style="margin-bottom: 10px; margin-top: 10px;" onclick="PopupForm('@Url.Action("AddOrEdit", "Simcard")/@Model.CorporateID')"> <i class="fa fa-plus"></i> Add SIM Card</a>
+<table id="simcardTable" class="table table-striped table-bordered" style="width: 100%">
+    <thead>
+        <tr>
+            <th>SIM Card Number</th>
+            <th>Customer Name</th>
+            <th></th>
+        </tr>
+    </thead>
+</table>
+<link href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+@section scripts {
+    <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+    <script>
+        var Popup, dataTable
+
+        $(document).ready(function () {
+            dataTable = $("#simcardTable").DataTable({
+                "ajax": {
+                    "url": "/Corporate/GetSimcards/@Model.CorporateID",
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "Number" },
+                    { "data": "CustomerName" },
+                    {
+                        "data": "SimcardID", "render": function (data) {
+                            console.log(data);
+                            return `<a class='btn btn-light btn-sm' onclick="PopupForm('@Url.Action("AddOrEdit", "Simcard")/@Model.CorporateID/${data}')"><i class='fa fa-pencil'></i> Edit</a>
+                                    <a class='btn btn-danger btn-sm text-default text-light' style='margin-left:5px;' onclick=Delete("${data}")><i class='fa fa-trash'></i> Delete</a>`
+                        },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "240px"
+                    }
+                ],
+                "language": {
+                    "emptyTable": "No Records"
+                }
+            });
+        });
+
+        function PopupForm(url) {
+            var formDiv = $('<div/>');
+            $.get(url)
+                .done(function (response) {
+                    formDiv.html(response);
+
+                    Popup = formDiv.dialog({
+                        autoOpen: true,
+                        resizable: false,
+                        title: 'Fill SIM Card Details',
+                        height: 400,
+                        width: 700,
+                        close: function () {
+                            Popup.dialog('destroy').remove();
+                        }
+                    });
+                });
+        }
+
+        function SubmitForm(form) {
+            $.validator.unobtrusive.parse(form);
+            if ($(form).valid()) {
+                $.ajax({
+                    type: "POST",
+                    url: form.action,
+                    data: $(form).serialize(),
+                    success: function (data) {
+                        if (data.success) {
+                            Popup.dialog('close');
+                            dataTable.ajax.reload();
+
+                            $.notify(data.message, {
+                                globalPosition: "top center",
+                                className: "success"
+                            })
+                        }
+                    }
+                });
+            }
+            return false;
+        }
+
+        function Delete(id) {
+            if (confirm('Are you sure to delete this SIM Card record?')) {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Delete", "Simcard")/' + @Model.CorporateID + '/' + id,
+                    success: function (data) {
+                        if (data.success) {
+                            dataTable.ajax.reload();
+
+                            $.notify(data.message, {
+                                globalPosition: "top center",
+                                className: "success"
+                            })
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}
