@@ -1,7 +1,112 @@
 ﻿
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Corporate Lists";
 }
 
-<h2>Index</h2>
+<h2>Corporate Lists</h2>
 
+<a class="btn btn-light" style="margin-bottom: 10px" onclick="PopupForm('@Url.Action("AddOrEdit", "Corporate")')"> <i class="fa fa-plus"></i> Add New</a>
+
+<table id="corporateTable" class="table table-striped table-bordered" style="width: 100%">
+    <thead>
+        <tr>
+            <th>Unique Number</th>
+            <th>Corporate Name</th>
+            <th>Address</th>
+            <th></th>
+        </tr>
+    </thead>
+</table>
+
+<link href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+
+@section scripts {
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+    <script>
+        var Popup, dataTable;
+        $(document).ready(function () {
+            dataTable = $("#corporateTable").DataTable({
+                "ajax": {
+                    "url": "/Corporate/GetData",
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "UniqueNumber" },
+                    { "data": "Name" },
+                    { "data": "Address" },
+                    {
+                        "data": "CorporateID", "render": function (data) {
+                            return `<a class='btn btn-light btn-sm' href="@Url.Action("show", "Corporate")/${data}"><i class='fa fa-eye'></i> Details</a>
+                                    <a class='btn btn-light btn-sm' onclick="PopupForm('/Corporate/AddOrEdit/${data}')"><i class='fa fa-pencil'></i> Edit</a>
+                                    <a class='btn btn-danger btn-sm text-default text-light' style='margin-left:5px;' onclick=Delete("${data}")><i class='fa fa-trash'></i> Delete</a>`
+                        },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "240px"
+                    }
+                ],
+                "language": {
+                    "emptyTable": "No Records"
+                }
+            });
+        });
+        function PopupForm(url) {
+            var formDiv = $('<div/>');
+            $.get(url)
+                .done(function (response) {
+                    formDiv.html(response);
+                    Popup = formDiv.dialog({
+                        autoOpen: true,
+                        resizable: false,
+                        title: 'Fill Corporate Details',
+                        height: 300,
+                        width: 400,
+                        close: function () {
+                            Popup.dialog('destroy').remove();
+                        }
+                    });
+                });
+        }
+        function SubmitForm(form) {
+            $.validator.unobtrusive.parse(form);
+            if ($(form).valid()) {
+                $.ajax({
+                    type: "POST",
+                    url: form.action,
+                    data: $(form).serialize(),
+                    success: function (data) {
+                        if (data.success) {
+                            Popup.dialog('close');
+                            dataTable.ajax.reload();
+                            $.notify(data.message, {
+                                globalPosition: "top center",
+                                className: "success"
+                            })
+                        }
+                    }
+                });
+            }
+            return false;
+        }
+        function Delete(id) {
+            if (confirm('Are you sure to delete this Corporate record?')) {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Delete", "Corporate")/' + id,
+                    success: function (data) {
+                        if (data.success) {
+                            dataTable.ajax.reload();
+                            $.notify(data.message, {
+                                globalPosition: "top center",
+                                className: "success"
+                            })
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}
